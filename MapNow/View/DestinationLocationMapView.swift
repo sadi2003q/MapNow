@@ -96,8 +96,6 @@ struct DestinationLocationMapView: View {
 }
 
 #Preview {
-    NavigationStack {
-        DestinationLocationMapView()
-            .modelContainer(DestinationModel.preview)
-    }
+    DestinationLocationMapView()
+        .modelContainer(DestinationModel.preview)
 }
