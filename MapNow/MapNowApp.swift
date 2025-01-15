@@ -24,9 +24,17 @@ struct MapNowApp: App {
     }()
 
     var body: some Scene {
+        /*
+         WindowGroup {
+             ContentView()
+         }
+         .modelContainer(sharedModelContainer)
+         */
         WindowGroup {
-            ContentView()
+            NavigationStack {
+                DestinationLocationMapView()
+            }
+            
         }
-        .modelContainer(sharedModelContainer)
     }
 }
