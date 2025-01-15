@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import SwiftData
 
 /// A SwiftUI view that displays a map with various markers and annotations highlighting notable locations in Dhaka.
 ///
@@ -63,49 +64,40 @@ struct DestinationLocationMapView: View {
     /// The visible region of the map, updated when the camera position changes.
     @State private var visibleRegion: MKCoordinateRegion?
     
+    @Query private var destinations: [DestinationModel]
+    
+    @State private var destination: DestinationModel?
+    
     var body: some View {
         Map(position: $cameraPosition) {
             
-            /// Marker for the **Air Force Museum** with a red circle icon.
-            Marker(DhakaLocation.airForceMuseum.location.name, systemImage: "circle.fill", coordinate: DhakaLocation.airForceMuseum.location.coordinate)
-            
-            /// Marker for **Ahsan Manzil** with a purple tint.
-            Marker(DhakaLocation.ahsanManzil.location.name, coordinate: DhakaLocation.ahsanManzil.location.coordinate)
-                .tint(.purple)
-            
-            /// Text annotation for **Army Stadium**.
-            Annotation(DhakaLocation.armyStadium.location.name, coordinate: DhakaLocation.armyStadium.location.coordinate) {
-                Text("Army Stadium")
+            if let destination {
+                ForEach(destination.placeMarks) { placeMark in
+                    Marker(coordinate: placeMark.coordinate) {
+                        Label(placeMark.name, systemImage: "star")
+                    }
+                    .tint(.green)
+                }
             }
-            
-            /// Custom pin annotation for **Curzon Hall**.
-            Annotation(DhakaLocation.curzonHall.location.name, coordinate: DhakaLocation.curzonHall.location.coordinate, anchor: .center) {
-                Image(systemName: "mappin")
-                    .scaleEffect(2)
-            }
-            
-            /// Circular overlay centered near Dhaka with a 5 km radius.
-            MapCircle(center: CLLocationCoordinate2D(latitude: 23.8041, longitude: 90.4152), radius: 5000)
-                .foregroundStyle(.red.opacity(0.2))
             
         }
         /// Updates `visibleRegion` when the map camera movement ends.
         .onMapCameraChange(frequency: .onEnd) { context in
             visibleRegion = context.region
         }
-        /// Sets the initial camera position to focus on Dhaka upon view appearance.
         .onAppear {
-            let currentLocation = CLLocationCoordinate2D(latitude: 23.8041, longitude: 90.4152)
-            let currentLocationSpan = MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15)
-            let currentLocationRegion = MKCoordinateRegion(center: currentLocation, span: currentLocationSpan)
-            
-            cameraPosition = .region(currentLocationRegion)
+            destination = destinations.first
+            if let region = destination?.region {
+                cameraPosition = .region(region)
+            }
         }
+        .ignoresSafeArea()
     }
 }
 
 #Preview {
     NavigationStack {
         DestinationLocationMapView()
+            .modelContainer(DestinationModel.preview)
     }
 }
