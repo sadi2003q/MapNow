@@ -18,7 +18,6 @@ struct DestinationListView: View {
     @State private var showAlert: Bool = false
     @State private var destinationName: String = ""
     
-    
     var body: some View {
         NavigationStack {
             DestinationListView
@@ -57,8 +56,11 @@ struct DestinationListView: View {
     }
     
     private var View_DestinationListIsNotEmpty: some View {
-        List {
-            ForEach(destinations, id: \.self) { destination in
+
+        List(destinations) { destination in
+            NavigationLink {
+                DestinationLocationMapView(destination: destination)
+            } label: {
                 HStack {
                     Image(systemName: "globe")
                         .font(.largeTitle)
@@ -84,7 +86,15 @@ struct DestinationListView: View {
                     
                 }
             }
+
+                
+            
+                
+                
+            
+           
         }
+
     }
     
     private var Button_AddView: some View {
@@ -110,6 +120,7 @@ struct DestinationListView: View {
                 
                 Add_NewDestination()
                 destinationName = ""
+                
             }
             .disabled( destinationName.isEmpty ? true : false)
             
@@ -137,8 +148,11 @@ struct DestinationListView: View {
 }
 
 #Preview {
-    DestinationListView()
-        //.modelContainer(for: DestinationModel.self)
-        .modelContainer(DestinationModel.preview)
+    NavigationStack {
+        DestinationListView()
+            
+            .modelContainer(DestinationModel.preview)
+    }
+   
 }
 
