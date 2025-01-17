@@ -12,13 +12,14 @@ import SwiftData
 
 struct DestinationLocationMapView: View {
     
+    @Environment(\.modelContext) var modelContext
     
     @State private var cameraPosition: MapCameraPosition = .automatic
     
     @State private var visibleRegion: MKCoordinateRegion?
     
     
-    @State var destination: DestinationModel
+    @Bindable var destination: DestinationModel
     
     var body: some View {
         
@@ -77,6 +78,8 @@ struct DestinationLocationMapView: View {
                     destination.latitudeDelta = visibleRegion.span.latitudeDelta
                     destination.longitudeDelta = visibleRegion.span.longitudeDelta
                 }
+                try? modelContext.save()
+                
             }
             .buttonStyle(.borderedProminent)
         }

@@ -17,7 +17,7 @@ struct MapNowApp: App {
         WindowGroup {
             NavigationStack {
                 //DestinationLocationMapView()
-                Text("Hello world")
+                DestinationListView()
             }
             
         }
