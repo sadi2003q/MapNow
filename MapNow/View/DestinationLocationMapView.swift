@@ -18,6 +18,14 @@ struct DestinationLocationMapView: View {
     
     @State private var visibleRegion: MKCoordinateRegion?
     
+    @State private var searchText = ""
+    
+    @FocusState private var isSearchFocused : Bool
+    @Query(filter: #Predicate<MTPlacemark> {$0.destination == nil}) private var searchPlaceMark: [MTPlacemark]
+    
+    private var listPlaceMark : [MTPlacemark] {
+        searchPlaceMark + destination.placeMarks
+    }
     
     @Bindable var destination: DestinationModel
     
@@ -38,12 +46,20 @@ struct DestinationLocationMapView: View {
     
     private var View_Map: some View {
         Map(position: $cameraPosition) {
-            ForEach(destination.placeMarks) { placeMark in
-                Marker(coordinate: placeMark.coordinate) {
-                    Label(placeMark.name, systemImage: "star")
+            ForEach(listPlaceMark) { placeMark in
+                
+                if placeMark.destination != nil {
+                    Marker(coordinate: placeMark.coordinate) {
+                        Label(placeMark.name, systemImage: "star")
+                    }
+                    .tint(.green)
+                } else {
+                    Marker(placeMark.name, coordinate: placeMark.coordinate)
                 }
-                .tint(.green)
             }
+        }
+        .safeAreaInset(edge: .bottom) {
+            
         }
         .onMapCameraChange(frequency: .onEnd) { context in
             visibleRegion = context.region
@@ -85,6 +101,33 @@ struct DestinationLocationMapView: View {
         }
         .padding(.horizontal)
     }
+    
+    private var View_SearchLocation: some View {
+        HStack {
+            TextField("Search ...", text: $searchText)
+                .textFieldStyle(.roundedBorder)
+                .focused($isSearchFocused)
+                .overlay(alignment: .trailing) {
+                    Button {
+                        searchText = ""
+                        isSearchFocused.toggle()
+                    } label: {
+                        Image(systemName: "magnifyingglass.circle.fill")
+                            .tint(.purple)
+                    }
+                }
+                .onSubmit {
+                    Task {
+                        await MapeManagement.searchPlaces(
+                            modelContext,
+                            searchText: searchText,
+                            visibleRegion: visibleRegion
+                        )
+                        searchText = ""
+                    }
+                }
+        }
+    }
 }
 
 #Preview {
@@ -98,4 +141,5 @@ struct DestinationLocationMapView: View {
     return NavigationStack {
         DestinationLocationMapView(destination: destination)
     }
+    .modelContainer(for: DestinationModel.self)
 }
