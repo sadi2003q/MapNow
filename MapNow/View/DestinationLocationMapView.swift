@@ -101,9 +101,9 @@ struct DestinationLocationMapView: View {
                             isFocused = false
                         } label: {
                             Image(systemName: "magnifyingglass.circle")
+                                .font(.title)
+                                .bold()
                         }
-                        .offset(y: -5)
-
                     }
                 }
                 .onSubmit {
