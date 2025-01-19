@@ -13,13 +13,13 @@ import SwiftData
 struct DestinationLocationMapView: View {
     
     @Environment(\.modelContext) var modelContext
-    
     @State private var cameraPosition: MapCameraPosition = .automatic
-    
     @State private var visibleRegion: MKCoordinateRegion?
-    
-    
     @Bindable var destination: DestinationModel
+    @State private var searchText: String = ""
+    @FocusState private var isFocused: Bool
+    
+    
     
     var body: some View {
         
@@ -28,7 +28,9 @@ struct DestinationLocationMapView: View {
             View_NewDestination
             View_AddNewLocation
             View_Map
-                .ignoresSafeArea()
+                .safeAreaInset(edge: .bottom ){
+                    View_SearchBar
+                }
                 .navigationTitle("Destination")
                 .navigationBarTitleDisplayMode(.inline)
             
@@ -53,6 +55,7 @@ struct DestinationLocationMapView: View {
                 cameraPosition = .region(region)
             }
         }
+        .ignoresSafeArea()
     }
     
     private var View_NewDestination: some View {
@@ -84,6 +87,37 @@ struct DestinationLocationMapView: View {
             .buttonStyle(.borderedProminent)
         }
         .padding(.horizontal)
+    }
+    
+    private var View_SearchBar: some View {
+        HStack {
+           TextField("Search", text: $searchText)
+                .textFieldStyle(.roundedBorder)
+                .focused($isFocused)
+                .overlay(alignment: .trailing) {
+                    if isFocused {
+                        Button {
+                            searchText = ""
+                            isFocused = false
+                        } label: {
+                            Image(systemName: "magnifyingglass.circle")
+                        }
+                        .offset(y: -5)
+
+                    }
+                }
+                .onSubmit {
+                    Task {
+                        await MapManagement.searchPlaces(
+                            modelContext,
+                            searchText: searchText,
+                            visibleRegion: visibleRegion
+                        )
+                    }
+                }
+            
+        }
+        .padding(.horizontal, 30)
     }
 }
 
