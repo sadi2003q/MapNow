@@ -39,6 +39,18 @@ class DestinationModel {
 }
 
 extension DestinationModel {
+    
+    @MainActor
+        static func fetchByName(_ name: String, from context: ModelContext) -> DestinationModel? {
+            let fetchDescriptor = FetchDescriptor<DestinationModel>(
+                predicate: #Predicate { $0.name == name }
+            )
+            
+            let results = try? context.fetch(fetchDescriptor)
+            return results?.first
+        }
+    
+    
     @MainActor
     static var preview: ModelContainer {
         let container = try! ModelContainer(

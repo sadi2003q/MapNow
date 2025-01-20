@@ -27,6 +27,7 @@ enum MapManagement {
         
         let result = searchItem?.mapItems ?? []
         
+       
         result.forEach {
             let mtPlaceMark = MTPlacemark(
                 name: $0.name ?? "",
@@ -35,7 +36,11 @@ enum MapManagement {
                 longitude: $0.placemark.coordinate.longitude
             )
             modelContext.insert(mtPlaceMark)
+            print(mtPlaceMark.name)
         }
+        
+       
+        
     }
     
     

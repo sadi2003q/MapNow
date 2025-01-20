@@ -150,7 +150,7 @@ struct DestinationListView: View {
 #Preview {
     NavigationStack {
         DestinationListView()
-            .modelContainer(for: DestinationModel.self)
+            .modelContainer(DestinationModel.preview)
     }
    
 }

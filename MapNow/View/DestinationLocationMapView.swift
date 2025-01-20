@@ -19,7 +19,11 @@ struct DestinationLocationMapView: View {
     @State private var searchText: String = ""
     @FocusState private var isFocused: Bool
     
+    @Query(filter: #Predicate<MTPlacemark> { $0.destination == nil }) private var searchPlacemark: [MTPlacemark]
     
+    private var listPlaceMark: [MTPlacemark] {
+        searchPlacemark + destination.placeMarks
+    }
     
     var body: some View {
         
@@ -41,10 +45,14 @@ struct DestinationLocationMapView: View {
     private var View_Map: some View {
         Map(position: $cameraPosition) {
             ForEach(destination.placeMarks) { placeMark in
-                Marker(coordinate: placeMark.coordinate) {
-                    Label(placeMark.name, systemImage: "star")
+                if placeMark.destination != nil {
+                    Marker(coordinate: placeMark.coordinate) {
+                        Label(placeMark.name, systemImage: "star")
+                    }
+                    .tint(.green)
+                } else {
+                    Marker(placeMark.name, coordinate: placeMark.coordinate)
                 }
-                .tint(.green)
             }
         }
         .onMapCameraChange(frequency: .onEnd) { context in
@@ -99,11 +107,13 @@ struct DestinationLocationMapView: View {
                         Button {
                             searchText = ""
                             isFocused = false
+                            
                         } label: {
-                            Image(systemName: "magnifyingglass.circle")
-                                .font(.title)
+                            Image(systemName: "xmark.circle")
+                                .font(.title3)
                                 .bold()
                         }
+                        .padding(.horizontal)
                     }
                 }
                 .onSubmit {
@@ -113,16 +123,37 @@ struct DestinationLocationMapView: View {
                             searchText: searchText,
                             visibleRegion: visibleRegion
                         )
+                        
+                        searchText = ""
                     }
                 }
-            
         }
         .padding(.horizontal, 30)
     }
 }
 
+//#Preview {
+//    let destination =  DestinationModel(
+//        name: "Dhaka",
+//        latitude: 23.8041,
+//        longitude: 90.4152,
+//        longitudeDelta: 0.15,
+//        latitudeDelta: 0.15
+//    )
+//    return NavigationStack {
+//        DestinationLocationMapView(destination: destination)
+//            .modelContainer(DestinationModel.preview)
+//            
+//    }
+//    
+//    
+//}
 #Preview {
-    let destination =  DestinationModel(
+    let container = DestinationModel.preview // Access the static preview container
+    let context = container.mainContext       // Retrieve the context
+    
+    // Fetch the specific "Dhaka" destination from the context
+    let dhakaDestination = DestinationModel.fetchByName("Dhaka", from: context) ?? DestinationModel(
         name: "Dhaka",
         latitude: 23.8041,
         longitude: 90.4152,
@@ -130,6 +161,7 @@ struct DestinationLocationMapView: View {
         latitudeDelta: 0.15
     )
     return NavigationStack {
-        DestinationLocationMapView(destination: destination)
+        DestinationLocationMapView(destination: dhakaDestination)
+            .modelContainer(container)
     }
 }
